@@ -1,0 +1,17 @@
+{
+    "userIdentifier": "teste",
+    "items": [
+        {
+            "productIdentifier": "a1",
+            "price": "100"
+        },
+        {
+            "productIdentifier": "a2",
+            "price": "299"
+        },
+        {
+            "productIdentifier": "a3",
+            "price": "50"
+        }
+    ]
+}
