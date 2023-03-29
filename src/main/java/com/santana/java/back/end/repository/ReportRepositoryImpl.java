@@ -1,9 +1,6 @@
 package com.santana.java.back.end.repository;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 import com.santana.java.back.end.dto.ShopReportDTO;
@@ -52,19 +49,18 @@ public class ReportRepositoryImpl
         StringBuilder sb = new StringBuilder();
 
         sb.append("select count(sp.id), sum(sp.total), avg(sp.total) ");
-
         sb.append("from shopping.shop sp ");
         sb.append("where sp.date >= :dataInicio ");
         sb.append("and sp.date <= :dataFim ");
 
         Query query = entityManager.createNativeQuery(sb.toString());
-        query.setParameter("dataInicio", dataInicio);
-        query.setParameter("dataFim", dataFim);
+        query.setParameter("dataInicio", dataInicio.atTime(0, 0));
+        query.setParameter("dataFim", dataFim.atTime(23, 59));
 
         Object[] result = (Object[]) query.getSingleResult();
 
         ShopReportDTO shopReportDTO = new ShopReportDTO();
-        shopReportDTO.setCount(((BigInteger) result[0]).intValue());
+        shopReportDTO.setCount(((Long) result[0]).intValue());
         shopReportDTO.setTotal((Double) result[1]);
         shopReportDTO.setMean((Double) result[2]);
         return shopReportDTO;

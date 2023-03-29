@@ -1,5 +1,6 @@
 package com.santana.java.back.end.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +26,7 @@ public class Shop {
     private long id;
     private String userIdentifier;
     private float total;
-    private LocalDateTime date;
+    private LocalDate date;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "item", joinColumns = @JoinColumn(name = "shop_id"))
@@ -44,5 +45,4 @@ public class Shop {
         return shop;
     }
 
-    
 }

@@ -1,5 +1,6 @@
 package com.santana.java.back.end.repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,6 @@ public interface ShopRepository extends JpaRepository<Shop, Long>, ReportReposit
 
     List<Shop> findAllByTotalGreaterThan(Float total);
 
-    List<Shop> findAllByDateGreaterThan(LocalDateTime date);
+    List<Shop> findAllByDateGreaterThan(LocalDate date);
 
 }

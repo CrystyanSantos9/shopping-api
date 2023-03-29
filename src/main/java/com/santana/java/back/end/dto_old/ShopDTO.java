@@ -1,5 +1,6 @@
-package com.santana.java.back.end.dto;
+package com.santana.java.back.end.dto_old;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +20,7 @@ public class ShopDTO {
     // @NotNull
     private Float total;
     // @NotNull
-    private LocalDateTime date;
+    private LocalDate date;
     @NotNull
     private List<ItemDTO> items;
 

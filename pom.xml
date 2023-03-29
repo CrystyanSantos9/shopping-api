@@ -16,6 +16,8 @@
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<docker.image.prefix>loja</docker.image.prefix>
+		<path.shared.dtos>/home/vagrant/github/java-microsservicos/shopping-client/target/shopping-client-0.0.1-SNAPSHOT.jar</path.shared.dtos>
+		<!-- <project.basedir>/home/vagrant/github/java-microsservicos/</project.basedir> -->
 	</properties>
 
 	<dependencies>
@@ -49,11 +51,13 @@
 			<artifactId>postgresql</artifactId>
 		</dependency>
 
-		<!-- <dependency>
+		<dependency>
 			<groupId>com.santana.java.back.end</groupId>
 			<artifactId>shopping-client</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency> -->
+			<scope>system</scope>
+			<systemPath>${path.shared.dtos}</systemPath>
+		</dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>

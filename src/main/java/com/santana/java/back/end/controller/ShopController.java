@@ -6,10 +6,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+import java.util.Date;
 import java.util.List;
 
 import com.santana.java.back.end.dto.ShopDTO;
@@ -17,11 +23,13 @@ import com.santana.java.back.end.dto.ShopReportDTO;
 import com.santana.java.back.end.service.ShopService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 public class ShopController {
-    @Autowired
-    private ShopService shopService;
+
+    private final ShopService shopService;
 
     @GetMapping("/shopping")
     public List<ShopDTO> getShops() {
@@ -50,16 +58,25 @@ public class ShopController {
     }
 
     @PostMapping("/shopping")
-    public ShopDTO newShop(@Valid @RequestBody ShopDTO shopDTO) {
+    public ShopDTO newShop(
+            @RequestHeader(name = "key", required = true) String key,
+            @Valid @RequestBody ShopDTO shopDTO) {
 
-        return shopService.save(shopDTO);
+        return shopService.save(shopDTO, key);
     }
 
     @GetMapping("/shopping/search")
     public List<ShopDTO> getShopsByFilter(
-            @RequestParam(name = "dataInicio", required = true) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataInicio,
-            @RequestParam(name = "dataFim", required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dataFim,
+            @RequestParam("dataInicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE, pattern = "dd/MM/yyyy") LocalDate dataInicio,
+            @RequestParam(name = "dataFim", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE, pattern = "dd/MM/yyyy") LocalDate dataFim,
             @RequestParam(name = "valorMinimo", required = false) Float valorMinimo) {
+
+        // DateTimeFormatter parser = new DateTimeFormatterBuilder()
+        // // dia/mês/ano
+        // .appendPattern("dd/MM/uuuu")
+        // // valor default para o horário (zero para meia-noite)
+        // .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).toFormatter();
+        // LocalDateTime dateTime = LocalDateTime.parse(dataInicio, parser);
         return shopService.getShopsByFilter(dataInicio, dataFim, valorMinimo);
     }
 

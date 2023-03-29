@@ -4,14 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.santana.java.back.end.converter.DTOConverter;
+import com.santana.java.back.end.dto.ItemDTO;
+import com.santana.java.back.end.dto.ProductDTO;
 import com.santana.java.back.end.dto.ShopDTO;
 import com.santana.java.back.end.dto.ShopReportDTO;
+import com.santana.java.back.end.dto.UserDTO;
+import com.santana.java.back.end.exception.ProductNotFoundException;
 import com.santana.java.back.end.model.Shop;
 import com.santana.java.back.end.repository.ReportRepositoryImpl;
 import com.santana.java.back.end.repository.ShopRepository;
@@ -20,25 +24,24 @@ import com.santana.java.back.end.repository.ShopRepository;
 public class ShopService {
     @Autowired
     private ShopRepository shopRepository;
+    @Autowired
     private ReportRepositoryImpl reportRepository;
+
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private UserService userService;
 
     public List<ShopDTO> getAll() {
         List<Shop> shops = shopRepository.findAll();
-
-        // convert to DTO array
-        return shops
-                .stream()
-                .map(ShopDTO::convert)
-                .collect(Collectors.toList());
+        return shops.stream().map(DTOConverter::convert).collect(Collectors.toList());
     }
 
     public List<ShopDTO> getByUser(String userIdentifier) {
         List<Shop> shops = shopRepository
                 .findAllByUserIdentifier(userIdentifier);
-        return shops
-                .stream()
-                .map(ShopDTO::convert)
-                .collect(Collectors.toList());
+        return shops.stream().map(DTOConverter::convert).collect(Collectors.toList());
     }
 
     public List<ShopDTO> getByDate(ShopDTO shopDTO) {
@@ -46,30 +49,45 @@ public class ShopService {
                 .findAllByDateGreaterThan(shopDTO.getDate());
         return shops
                 .stream()
-                .map(ShopDTO::convert)
+                .map(DTOConverter::convert)
                 .collect(Collectors.toList());
     }
 
     public ShopDTO findById(long ProductId) {
         Optional<Shop> shop = shopRepository.findById(ProductId);
         if (shop.isPresent()) {
-            return ShopDTO.convert(shop.get());
+            return DTOConverter.convert(shop.get());
         }
-        return null;
+        throw new ProductNotFoundException();
     }
 
-    public ShopDTO save(ShopDTO shopDTO) {
+    public ShopDTO save(ShopDTO shopDTO, String key) {
+
+        UserDTO userDTO = userService.getUserByCpf(shopDTO.getUserIdentifier(), key);
+
+        validateProducts(shopDTO.getItems());
+
         shopDTO.setTotal(shopDTO.getItems()
                 .stream()
                 .map(x -> x.getPrice())
                 .reduce((float) 0, Float::sum));
 
         Shop shop = Shop.convert(shopDTO);
-        shop.setDate(LocalDateTime.now());
-        System.out.println(new Date());
+        shop.setDate(LocalDate.now());
 
         shop = shopRepository.save(shop);
-        return ShopDTO.convert(shop);
+        return DTOConverter.convert(shop);
+    }
+
+    private boolean validateProducts(List<ItemDTO> items) {
+        for (ItemDTO item : items) {
+            ProductDTO productDTO = productService.getProductByIdentifier(item.getProductIdentifier());
+            if (productDTO == null) {
+                return false;
+            }
+            item.setPrice(productDTO.getPreco());
+        }
+        return true;
     }
 
     public List<ShopDTO> getShopsByFilter(
@@ -79,7 +97,7 @@ public class ShopService {
         List<Shop> shops = reportRepository.getShopByFilters(dataInicio, dataFim, valorMinimo);
         return shops
                 .stream()
-                .map(ShopDTO::convert)
+                .map(DTOConverter::convert)
                 .collect(Collectors.toList());
     }
 
