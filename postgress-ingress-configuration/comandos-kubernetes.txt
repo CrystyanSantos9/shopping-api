@@ -1,0 +1,70 @@
+Implantar dashboard : https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+Criando usuário de exemplo: https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
+
+1 - aplica user-sample-dashboard.yaml 
+2 - Pegando um token gerado para acessar dashboard
+
+$ kubectl -n kubernetes-dashboard create token admin-user
+
+saida:
+
+eyJhbGciOiJSUzI1NiIsImtpZCI6InVWZXhqcl81TU11bGkzZnRoTzMyYUd0LWh0NHZ3djh5YUJ3S1Y5dDNraWcifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNjgwMTA5NzMyLCJpYXQiOjE2ODAxMDYxMzIsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsInNlcnZpY2VhY2NvdW50Ijp7Im5hbWUiOiJhZG1pbi11c2VyIiwidWlkIjoiODM4OWM3NjMtOGM5Mi00NDEwLTliNzktMjRhZGE5ZDQ5MDNlIn19LCJuYmYiOjE2ODAxMDYxMzIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlcm5ldGVzLWRhc2hib2FyZDphZG1pbi11c2VyIn0.ExcZa3HtrNQi_fCOLWRTY5gqf6eDjWNZe23fbCe-uisfw9elLet0s3x8lp4Wjqao5ZjovFbuCe-pS856G2HqnwHDxACXCRBiqNLmviP579EbyX7iEGeLuOWF6qutr4HZvayaMF4n_6p7GWCpraEwlXd3CqGa_b33jCLS7j25aQh95nN1en9TpNVzlu7Yh-QvkERKgiRJOvcTynKsKvXXY1wJI7IjXimlauYmcGqxhFuzWSLr6IMf7ounYwQda4efg92e4AOz4vfo3kntEyZqPSMZKXkToXsEzO8-Un_aWU15BuQTcx3Ke99DMj75lQ7gm2LDS1-gb7L64Vi4OE9Usg
+
+3 - Para acessar o dashboard temos que fazer um proxy para disponibilizar o acesso ao dashboard 
+
+$ kubectl proxy
+
+ou para acessar de qualquer ip 
+
+$ kubectl proxy --address='0.0.0.0' 
+
+Em nosso caso - para ele permitir chamadas de outros hosts, temos que usar o accept-hosts 
+
+$ kubectl proxy --address='0.0.0.0' --accept-hosts='^192.168.1.110$,^0\.0\.0\.0$,^\[::1\]$'
+
+Mesmo assim teremos erros com https - para resolver vamos modificar as linhas abaixo do arquivo de impltancao do dashboard
+
+diremos que ele pode falar via modo inseguro 
+
+  containers:
+                - name: kubernetes-dashboard
+                  image: kubernetesui/dashboard:v2.7.0
+                  imagePullPolicy: Always
+                  #   ports:
+                  #       - containerPort: 8443
+                  #         protocol: TCP
+                  ports:
+                      - containerPort: 9090
+                        protocol: TCP
+                  args:
+                      #- --auto-generate-certificates
+                      - --namespace=kubernetes-dashboard
+                      - "--namespace=default"
+                      - "--insecure-bind-address=0.0.0.0"
+                      - "--enable-insecure-login"
+                      # - '--insecure-port=5443'
+
+aplicar o arquivo kubernetes-dashboard
+
+Abrir o proxy novamente
+
+$ kubectl proxy --address='0.0.0.0' --accept-hosts='^*$'
+
+e acessar a URL 
+
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
+
+feito isso, podemos colocar o token que geramos em token (x)  e teremos acesso ao dashboard 
+
+Mais detalhes: https://stackoverflow.com/questions/62965122/is-it-possible-to-disable-kubernetes-dashboard-tls-check
+
+Se não teriamos que usar o nginx 
+
+Mais detalhes do dashboard aqui: https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
+
+
+
+

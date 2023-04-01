@@ -31,7 +31,7 @@ public class ShopController {
 
     private final ShopService shopService;
 
-    @GetMapping("/shopping")
+    @GetMapping("/shopping/")
     public List<ShopDTO> getShops() {
         List<ShopDTO> produtos = shopService.getAll();
         return produtos;
@@ -57,7 +57,7 @@ public class ShopController {
         return shopService.findById(id);
     }
 
-    @PostMapping("/shopping")
+    @PostMapping("/shopping/")
     public ShopDTO newShop(
             @RequestHeader(name = "key", required = true) String key,
             @Valid @RequestBody ShopDTO shopDTO) {

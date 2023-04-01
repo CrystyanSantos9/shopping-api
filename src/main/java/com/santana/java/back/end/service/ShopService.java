@@ -53,8 +53,8 @@ public class ShopService {
                 .collect(Collectors.toList());
     }
 
-    public ShopDTO findById(long ProductId) {
-        Optional<Shop> shop = shopRepository.findById(ProductId);
+    public ShopDTO findById(long shoppingId) {
+        Optional<Shop> shop = shopRepository.findById(shoppingId);
         if (shop.isPresent()) {
             return DTOConverter.convert(shop.get());
         }
